@@ -4,7 +4,7 @@ void strbuf_init(struct strbuf *sb, size_t alloc)
     if(alloc==0)alloc=1;
     sb->len=0;
     sb->alloc=alloc;
-    sb->buf=malloc(alloc*sizeof(char));
+    sb->buf=(char*)malloc(alloc*sizeof(char));
     if(sb->buf==NULL)
     {
         exit(1);
@@ -16,7 +16,7 @@ void strbuf_attach(struct strbuf *sb, void *str, size_t len, size_t alloc)
     if(alloc<=len)alloc=len+1;
     if(sb->alloc<alloc)
     {
-        char* p=realloc(sb->buf,alloc);
+        char* p=(char*)realloc(sb->buf,alloc);
         if(p==NULL)
         {
             exit(1);
@@ -70,18 +70,18 @@ void strbuf_reset(struct strbuf *sb)
 }
 void strbuf_grow(struct strbuf *sb, size_t extra)
 {
-    size_t new=(size_t)sb->len+extra+1;
-    if(new<=sb->alloc)return;
+    size_t need=(size_t)sb->len+extra+1;
+    if(need<=sb->alloc)return;
     size_t new_alloc=sb->alloc;
     if(new_alloc==0)
     {
         new_alloc=1;
     }
-    while(new_alloc<new)
+    while(new_alloc<need)
     {
         new_alloc*=2;
     }
-    char* p=realloc(sb->buf,new_alloc);
+    char* p=(char*)realloc(sb->buf,new_alloc);
     if(p==NULL)exit(1);
     sb->alloc=new_alloc;
     sb->buf=p;
@@ -196,7 +196,7 @@ int strbuf_getline(struct strbuf *sb, FILE *fp)
 }
 struct strbuf** strbuf_split_buf(const char* str, size_t len, int terminator, int max)
 {
-    struct strbuf** part=malloc((len+1)*sizeof(struct strbuf*));
+    struct strbuf** part=(struct strbuf**)malloc((len+1)*sizeof(struct strbuf*));
     if(part==NULL)exit(1);
     int start=0;
     int count=0;
@@ -207,7 +207,7 @@ struct strbuf** strbuf_split_buf(const char* str, size_t len, int terminator, in
             if(i==len&&start==i)break;
             int length=i-start;
             if(i<len)length++;
-            struct strbuf* sb=malloc(sizeof(*sb));
+            struct strbuf* sb=(struct strbuf*)malloc(sizeof(*sb));
             if(sb==NULL)exit(1);
             strbuf_init(sb,length+1);
             strbuf_add(sb,str+start,length);
@@ -237,7 +237,7 @@ char* strbuf_get_mid_buf(char* target_buf, int begin, int end, int len)
         return NULL;
     }
     int n=end-begin;
-    char* p=malloc(n+1);
+    char* p=(char*)malloc(n+1);
     if(p==NULL)return NULL;
     for(int i=0;i<n;i++)
     {
